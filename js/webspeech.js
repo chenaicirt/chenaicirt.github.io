@@ -1,10 +1,15 @@
 
+var final_transcript = '';
+var recognizing = false;
+var ignore_onend;
+var start_timestamp;
 
 
- $(document).keydown(function(e) {
+function myFunction(event) {
+    var x = event.keyCode;
+    if (x == 32) {  // 27 is the ESC key
+        alert ("You pressed the space key!");
 
-    if (e.which == 32) {
-      
         if (!('webkitSpeechRecognition' in window)) {
           upgrade();
         } else {
@@ -15,18 +20,15 @@
 
           recognition.onstart = function() {
             recognizing = true;
-            showInfo('info_speak_now');
-            start_img.src = '/intl/en/chrome/assets/common/images/content/mic-animate.gif';
           };
-
           recognition.onerror = function(event) {
             if (event.error == 'no-speech') {
-              start_img.src = '/intl/en/chrome/assets/common/images/content/mic.gif';
+              start_img.src = 'mic.gif';
               showInfo('info_no_speech');
               ignore_onend = true;
             }
             if (event.error == 'audio-capture') {
-              start_img.src = '/intl/en/chrome/assets/common/images/content/mic.gif';
+              start_img.src = 'mic.gif';
               showInfo('info_no_microphone');
               ignore_onend = true;
             }
@@ -39,13 +41,12 @@
               ignore_onend = true;
             }
           };
-
           recognition.onend = function() {
             recognizing = false;
             if (ignore_onend) {
               return;
             }
-            start_img.src = '/intl/en/chrome/assets/common/images/content/mic.gif';
+            start_img.src = 'mic.gif';
             if (!final_transcript) {
               showInfo('info_start');
               return;
@@ -57,20 +58,10 @@
               range.selectNode(document.getElementById('final_span'));
               window.getSelection().addRange(range);
             }
-            if (create_email) {
-              create_email = false;
-              createEmail();
-            }
+            
           };
-
           recognition.onresult = function(event) {
             var interim_transcript = '';
-            if (typeof(event.results) == 'undefined') {
-              recognition.onend = null;
-              recognition.stop();
-              upgrade();
-              return;
-            }
             for (var i = event.resultIndex; i < event.results.length; ++i) {
               if (event.results[i].isFinal) {
                 final_transcript += event.results[i][0].transcript;
@@ -86,15 +77,12 @@
             }
           };
         }
-
         function upgrade() {
           start_button.style.visibility = 'hidden';
           showInfo('info_upgrade');
         }
-            }
-
- });
 
 
 
-
+    }
+}
