@@ -21,28 +21,14 @@ $(document).on('keydown', function ( e ) {
 
           recognition.onstart = function() {
             recognizing = true;
+            console.log('Speech recognition service has started');
           };
 
           recognition.onerror = function(event) {
             console.log('Speech recognition error detected: ' + event.error);
-          }
+          };
           recognition.onend = function() {
-            recognizing = false;
-            if (ignore_onend) {
-              return;
-            }
-            if (!final_transcript) {
-              showInfo('info_start');
-              return;
-            }
-            showInfo('');
-            if (window.getSelection) {
-              window.getSelection().removeAllRanges();
-              var range = document.createRange();
-              range.selectNode(document.getElementById('final_span'));
-              window.getSelection().addRange(range);
-            }
-            
+            console.log('Speech recognition service disconnected');
           };
           recognition.onresult = function(event) {
             var interim_transcript = '';
@@ -60,7 +46,7 @@ $(document).on('keydown', function ( e ) {
           };
         }
         function upgrade() {
-          showInfo('inafo_upgrade');
+          showInfo('info_upgrade');
         }
 
 
@@ -76,7 +62,7 @@ $(document).on('keydown', function ( e ) {
           final_span.innerHTML = '';
           interim_span.innerHTML = '';
           showInfo('info_allow');
-          
+
           start_timestamp = event.timeStamp;
         }
 
