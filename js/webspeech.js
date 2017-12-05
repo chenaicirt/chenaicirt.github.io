@@ -5,15 +5,16 @@ var ignore_onend;
 var start_timestamp;
 
 
-function myFunction(event) {
-    var x = event.keyCode;
-    if (x == 32) {  // 27 is the ESC key
-        alert ("You pressed the space key!");
 
+$(document).on('keydown', function ( e ) {
+    if (e.which == 32) {  // 27 is the ESC key
+      startButton(e);
+    }
+
+});
         if (!('webkitSpeechRecognition' in window)) {
           upgrade();
         } else {
-          start_button.style.display = 'inline-block';
           var recognition = new webkitSpeechRecognition();
           recognition.continuous = true;
           recognition.interimResults = true;
@@ -21,32 +22,15 @@ function myFunction(event) {
           recognition.onstart = function() {
             recognizing = true;
           };
+
           recognition.onerror = function(event) {
-            if (event.error == 'no-speech') {
-              start_img.src = 'mic.gif';
-              showInfo('info_no_speech');
-              ignore_onend = true;
-            }
-            if (event.error == 'audio-capture') {
-              start_img.src = 'mic.gif';
-              showInfo('info_no_microphone');
-              ignore_onend = true;
-            }
-            if (event.error == 'not-allowed') {
-              if (event.timeStamp - start_timestamp < 100) {
-                showInfo('info_blocked');
-              } else {
-                showInfo('info_denied');
-              }
-              ignore_onend = true;
-            }
-          };
+            console.log('Speech recognition error detected: ' + event.error);
+          }
           recognition.onend = function() {
             recognizing = false;
             if (ignore_onend) {
               return;
             }
-            start_img.src = 'mic.gif';
             if (!final_transcript) {
               showInfo('info_start');
               return;
@@ -72,17 +56,50 @@ function myFunction(event) {
             final_transcript = capitalize(final_transcript);
             final_span.innerHTML = linebreak(final_transcript);
             interim_span.innerHTML = linebreak(interim_transcript);
-            if (final_transcript || interim_transcript) {
-              showButtons('inline-block');
-            }
+
           };
         }
         function upgrade() {
-          start_button.style.visibility = 'hidden';
-          showInfo('info_upgrade');
+          showInfo('inafo_upgrade');
         }
 
 
+        function startButton(event) {
+          if (recognizing) {
+            recognition.stop();
+            return;
+          }
+          final_transcript = '';
+          recognition.lang = 'en-US';
+          recognition.start();
+          ignore_onend = false;
+          final_span.innerHTML = '';
+          interim_span.innerHTML = '';
+          showInfo('info_allow');
+          
+          start_timestamp = event.timeStamp;
+        }
 
-    }
-}
+        function showInfo(s) {
+            if (s) {
+              for (var child = info.firstChild; child; child = child.nextSibling) {
+                if (child.style) {
+                  child.style.display = child.id == s ? 'inline' : 'none';
+                }
+              }
+              info.style.visibility = 'visible';
+            } else {
+              info.style.visibility = 'hidden';
+            }
+        }
+
+        var first_char = /\S/;
+        function capitalize(s) {
+         return s.replace(first_char, function(m) { return m.toUpperCase(); });
+        }
+
+
+    
+
+
+
